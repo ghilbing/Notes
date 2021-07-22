@@ -9,22 +9,26 @@ import com.hilbing.core.usecase.AddNote
 import com.hilbing.core.usecase.GetAllNotes
 import com.hilbing.core.usecase.GetNote
 import com.hilbing.core.usecase.RemoveNote
+import com.hilbing.notes.framework.di.AppModule
+import com.hilbing.notes.framework.di.DaggerViewModelComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 class ListViewModel(application: Application): AndroidViewModel(application) {
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    val repository = NoteRepository(RoomNoteDataSource(application))
+    @Inject
+    lateinit var useCases: UseCases
 
-    val useCases = UseCases(
-        AddNote(repository),
-        GetAllNotes(repository),
-        GetNote(repository),
-        RemoveNote(repository)
-    )
+    init{
+        DaggerViewModelComponent.builder()
+            .appModule(AppModule(getApplication()))
+            .build()
+            .inject(this)
+    }
 
     val notes = MutableLiveData<List<Note>>()
 
