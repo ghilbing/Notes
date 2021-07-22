@@ -5,13 +5,19 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.Navigation
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.hilbing.notes.R
+import com.hilbing.notes.framework.ListViewModel
 import kotlinx.android.synthetic.main.fragment_list.*
 
 
 class ListFragment : Fragment() {
 
+    private val notesListAdapter = NotesListAdapter(arrayListOf())
+    private lateinit var viewModel: ListViewModel
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -23,7 +29,26 @@ class ListFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        notesRecyclerView.apply{
+            layoutManager = LinearLayoutManager(context)
+            adapter = notesListAdapter
+        }
         addNote.setOnClickListener { goToNoteDetails() }
+        viewModel = ViewModelProviders.of(this).get(ListViewModel::class.java)
+        observeViewModel()
+    }
+
+    private fun observeViewModel() {
+        viewModel.notes.observe(viewLifecycleOwner, Observer {
+            loadingView.visibility = View.GONE
+            notesRecyclerView.visibility = View.VISIBLE
+            notesListAdapter.updateNotes(it.sortedBy{it.updateTime})
+        })
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.getNotes()
     }
 
     private fun goToNoteDetails(id: Long = 0L){
