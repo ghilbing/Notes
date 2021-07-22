@@ -14,9 +14,9 @@ import com.hilbing.notes.framework.ListViewModel
 import kotlinx.android.synthetic.main.fragment_list.*
 
 
-class ListFragment : Fragment() {
+class ListFragment : Fragment(), ListAction{
 
-    private val notesListAdapter = NotesListAdapter(arrayListOf())
+    private val notesListAdapter = NotesListAdapter(arrayListOf(), this)
     private lateinit var viewModel: ListViewModel
 
     override fun onCreateView(
@@ -54,6 +54,11 @@ class ListFragment : Fragment() {
     private fun goToNoteDetails(id: Long = 0L){
         val action = ListFragmentDirections.actionListFragmentToNoteFragment(id)
         Navigation.findNavController(notesRecyclerView).navigate(action)
+    }
+
+    override fun onClick(id: Long) {
+        goToNoteDetails(id)
+
     }
 
 }
